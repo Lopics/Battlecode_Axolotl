@@ -1,0 +1,28 @@
+MAIN OBJECTIVES:
+- 1000 Victory Points
+- Eliminate all enemy robots
+
+* BULLETS *
+They are currency of the game.
+Plant trees to farm bullets.
+bullets can be either exchanged for Victory Points, or used to build an army to destroy the other team.
+Each team starts with 300 bullets
+
+* TREES *
+Bullet tree costs 50B
+MAX is 50HP & START WITH 10HP increment of 0.5HP each turn. 80 turns to produce any bullets.
+Can produce a max of 1B per turn depending on it's health.
+WATERING a tree increase it's health by 5.
+
+* UNIT PRODUCTION *
+ONLY 1 Gardener per 10 turns.
+A ROBOT start with 20% HP then increase 4% per turn for 20 turns. After 20 turns it can run code.
+
+* TANKS * 
+Tank attempt to move onto a tree cause 2 damage.
+
+** One Victory Point for every 10B
+
+
+
+ 
