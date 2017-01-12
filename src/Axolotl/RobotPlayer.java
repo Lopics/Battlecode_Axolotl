@@ -1,4 +1,4 @@
-package First;
+package Axolotl;
 
 import battlecode.common.*;
 
@@ -14,7 +14,7 @@ public strictfp class RobotPlayer  extends General{
 
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
-        First.RobotPlayer.rc = rc;
+        Axolotl.RobotPlayer.rc = rc;
         General.init(rc);
         // Here, we've separated the controls into a different method for each RobotType.
         // You can add the missing ones or rewrite this into your own control structure.
@@ -68,7 +68,7 @@ public strictfp class RobotPlayer  extends General{
      */
     static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
-        // First, try intended direction
+        // Axolotl, try intended direction
         if (rc.canMove(dir)) {
             rc.move(dir);
             return true;

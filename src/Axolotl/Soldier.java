@@ -1,13 +1,13 @@
-package First;
+package Axolotl;
 
 import battlecode.common.Clock;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.Team;
 
-import static First.RobotPlayer.randomDirection;
-import static First.RobotPlayer.rc;
-import static First.RobotPlayer.tryMove;
+import static Axolotl.RobotPlayer.randomDirection;
+import static Axolotl.RobotPlayer.rc;
+import static Axolotl.RobotPlayer.tryMove;
 
 public class Soldier {
     public static void loop(){

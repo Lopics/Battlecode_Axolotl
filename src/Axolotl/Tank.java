@@ -1,13 +1,11 @@
-package First;
+package Axolotl;
 
 import battlecode.common.Clock;
 
-public class Scout {
+public class Tank {
     public static void loop(){
         while (true){
-
             Clock.yield();
         }
-
     }
 }

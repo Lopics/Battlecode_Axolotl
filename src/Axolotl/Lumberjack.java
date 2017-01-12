@@ -1,10 +1,10 @@
-package First;
+package Axolotl;
 
 import battlecode.common.*;
 
-import static First.RobotPlayer.randomDirection;
-import static First.RobotPlayer.rc;
-import static First.RobotPlayer.tryMove;
+import static Axolotl.RobotPlayer.randomDirection;
+import static Axolotl.RobotPlayer.rc;
+import static Axolotl.RobotPlayer.tryMove;
 
 /**
  * Created by Dan on 1/10/2017.
