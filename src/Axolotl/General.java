@@ -12,7 +12,8 @@ public class General {
     public static Team EnemyTeam;
     public static int myID;
     public static RobotType myType;
-    public static float mySensorRadius;
+    public static float mySightRadius;
+    public static float myBodyRadius;
 
     public static void init(RobotController RC) {
         rc = RC;
@@ -20,7 +21,8 @@ public class General {
         EnemyTeam = myTeam.opponent();
         myID = rc.getID();
         myType = rc.getType();
-        mySensorRadius = myType.sensorRadius;
+        mySightRadius = myType.sensorRadius;
+        myBodyRadius = myType.bodyRadius;
     }
     public static void update() {
         myLocation = rc.getLocation();

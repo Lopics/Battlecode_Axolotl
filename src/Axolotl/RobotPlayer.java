@@ -32,8 +32,10 @@ public strictfp class RobotPlayer  extends General{
                 Lumberjack.loop();
                 break;
             case TANK:
+                Tank.loop();
                 break;
             case SCOUT:
+                Scout.loop();
                 break;
         }
     }
