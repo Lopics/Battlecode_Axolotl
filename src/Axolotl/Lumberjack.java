@@ -5,12 +5,14 @@ import battlecode.common.*;
 import java.util.Map;
 
 import static Axolotl.General.EnemyTeam;
+import static Axolotl.Movement.goToDirect;
+import static Axolotl.Movement.tryMoveInDirection;
 import static Axolotl.RobotPlayer.randomDirection;
 import static Axolotl.RobotPlayer.rc;
 import static Axolotl.RobotPlayer.tryMove;
 
 public class Lumberjack extends General {
-    static MapLocation[] Local;
+
     public static void loop() throws GameActionException {
 
         // The code you want your robot to perform every round should be in this loop
@@ -37,30 +39,39 @@ public class Lumberjack extends General {
                     tryMove(randomDirection());
                 }
             }*/
+            try {
+                update();
 
-                MapLocation[] Local = readNTree();
+                TreeInfo[] Trees = rc.senseNearbyTrees(mySightRadius, Team.NEUTRAL);
+                if (Trees.length > 0) {
+                    if (myLocation.distanceTo(Trees[0].getLocation())-myBodyRadius- Trees[0].getRadius()> 0) {
+                        goToDirect(Trees[0].getLocation());
+                    }
+                    if (rc.canChop(Trees[0].getLocation())) {
+                        rc.chop(Trees[0].getLocation());
+                        if (!rc.canSenseTree(Trees[0].getID())) {
+                            rc.broadcast(100, 0);
+                        }
+                    }
 
-            if(Local.length > 0){
-                if(rc.canMove(Local[0])){
-                    rc.move(Local[0]);
+                } else {
+                    if (rc.readBroadcast(100) != 0) {
+                        int[] coord = decode(rc.readBroadcast(100));
+                        int x = coord[0];
+                        int y = coord[1];
+                        tryMoveInDirection(myLocation.directionTo(new MapLocation(x, y)));
+                    }
                 }
+                Clock.yield();
+            } catch (Exception e) {
+                System.out.println("Lumber Exception");
+                e.printStackTrace();
             }
             // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
-            Clock.yield();
+
         }
+
     }
 
-    private static MapLocation[] readNTree() throws GameActionException {
-        if (rc.readBroadcast(5) > 0) {
-            MapLocation[] treeLocations = new MapLocation[rc.readBroadcast(5)];
-            int count = 0;
-            for (int x = 0; x < rc.readBroadcast(5); x += 2) {
-                if (rc.readBroadcast(100 + x) != 0) {
-                    treeLocations[count] = new MapLocation(rc.readBroadcast(100 + x), rc.readBroadcast(101 + x));
-                }
-            }
-            return treeLocations;
-        }
-        return null;
-    }
+
 }
