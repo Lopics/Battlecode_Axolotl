@@ -5,9 +5,8 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.Team;
 
-import static Axolotl.RobotPlayer.randomDirection;
-import static Axolotl.RobotPlayer.rc;
-import static Axolotl.RobotPlayer.tryMove;
+import static Axolotl.Movement.*;
+
 
 public class Soldier {
     public static void loop(){

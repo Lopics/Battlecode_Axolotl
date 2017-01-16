@@ -6,12 +6,6 @@ public class General {
     private static final int MAX = 1000;
     private static final int MIN = 0;
 
-    public static final int BROADCAST_NUMBER_OF_GARDENER = 0;
-    public static final int BROADCAST_NUMBER_OF_LUMBERJACK = 1;
-    public static final int BROADCAST_NUMBER_OF_SCOUT = 2;
-    public static final int BROADCAST_NUMBER_OF_SOLDIER = 3;
-    public static final int BROADCAST_NUMBER_OF_TANK = 4;
-
     public static RobotController rc;
     public static MapLocation myLocation;
     public static Team myTeam;
@@ -20,13 +14,16 @@ public class General {
     public static RobotType myType;
     public static float mySightRadius;
     public static float myBodyRadius;
-    public static MapLocation[] ourInitialArchonLocations;
-    public static MapLocation[] theirInitialArchonLocations;
+    public static MapLocation[] myInitialArchonLocations;
+    public static MapLocation[] EnemyInitialArchonLocations;
     public static int numberOfInitialArchon;
     public static int roundNum;
     public static float mySenseRadius;
     public static RobotInfo[] visibleEnemies = null;
     public static TreeInfo[] visibleNeutralTrees = null;
+    public static RobotInfo[] visibleAllies = null;
+    public static MapLocation[] broadcastingRobot = null;
+    public static BulletInfo[] visibleBullets = null;
 
     public static void init(RobotController RC) {
         rc = RC;
@@ -36,18 +33,22 @@ public class General {
         myType = rc.getType();
         mySightRadius = myType.sensorRadius;
         myBodyRadius = myType.bodyRadius;
-        ourInitialArchonLocations = rc.getInitialArchonLocations(myTeam);
-        theirInitialArchonLocations = rc.getInitialArchonLocations(EnemyTeam);
-        numberOfInitialArchon = ourInitialArchonLocations.length;
+        myInitialArchonLocations = rc.getInitialArchonLocations(myTeam);
+        EnemyInitialArchonLocations = rc.getInitialArchonLocations(EnemyTeam);
+        numberOfInitialArchon = myInitialArchonLocations.length;
     }
 
     public static void update() {
         myLocation = rc.getLocation();
         roundNum = rc.getRoundNum();
     }
-
+    public  static void updateBullets(){
+        visibleBullets = rc.senseNearbyBullets();
+    }
     public static void updateRobotInfos() {
         visibleEnemies =  rc.senseNearbyRobots(mySenseRadius, EnemyTeam);
+        visibleAllies = rc.senseNearbyRobots(mySenseRadius, myTeam);
+        broadcastingRobot = rc.senseBroadcastingRobotLocations();
     }
 
     public static void updateTreeInfos(){

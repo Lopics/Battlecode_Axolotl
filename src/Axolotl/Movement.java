@@ -4,83 +4,67 @@ import battlecode.common.*;
 
 public class Movement extends General {
 
-    public static boolean tryMoveInDirection(Direction dir) throws GameActionException {
+    static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
+
+        // Axolotl, try intended direction
         if (rc.canMove(dir)) {
             rc.move(dir);
             return true;
         }
-        Direction left = dir.rotateLeftDegrees(45);
-        if (rc.canMove(left)) {
-            rc.move(left);
-            return true;
-        }
-        Direction right = dir.rotateRightDegrees(45);
-        if (rc.canMove(right)) {
-            rc.move(right);
-            return true;
-        }
-        Direction leftLeft = left.rotateLeftDegrees(90);
-        if (rc.canMove(leftLeft)) {
-            rc.move(leftLeft);
-            return true;
-        }
-        Direction rightRight = right.rotateRightDegrees(90);
-        if (rc.canMove(rightRight)) {
-            rc.move(rightRight);
-            return true;
-        }
-        return false;
-    }
 
-    public static boolean goToDirect(MapLocation dest) throws GameActionException {
-        if (myLocation.equals(dest)) {
-            return false;
-        }
+        // Now try a bunch of similar angles
+        int currentCheck = 1;
 
-        Direction forward = myLocation.directionTo(dest);
-        MapLocation forwardLoc = myLocation.add(forward);
+        while (currentCheck <= checksPerSide) {
+            // Try the offset of the left side
+            Direction leftSide = dir.rotateLeftDegrees(degreeOffset * currentCheck);
+            if (rc.canMove(leftSide)) {
+                if (!willCollideWithMe(visibleBullets, myLocation.add(leftSide))) {
+                    rc.move(leftSide);
+                    return true;
 
-        if (rc.canMove(forward)) {
-            System.out.println(myLocation.distanceTo(dest));
-            rc.move(forward);
-            return true;
-        }
-
-        if (rc.isLocationOccupiedByRobot(forwardLoc)) {
-            RobotInfo U = rc.senseRobotAtLocation(forwardLoc);
-            if (U.getTeam() == EnemyTeam) {
-                if (rc.canStrike() && myLocation.distanceTo(U.getLocation()) - myBodyRadius - U.getRadius() <= 1) {
-                    rc.strike();
                 }
-            } else if (U.getTeam() == myTeam) {
-                Direction[] dirs;
-                if (preferLeft(dest)) {
-                    dirs = new Direction[]{ forward.rotateLeftDegrees(90), forward.rotateRightDegrees(90),
-                            forward.rotateLeftDegrees(90).rotateLeftDegrees(90), forward.rotateRightDegrees(90).rotateRightDegrees(90)};
-                } else {
-                    dirs = new Direction[]{ forward.rotateRightDegrees(90), forward.rotateLeftDegrees(90),
-                            forward.rotateRightDegrees(90).rotateRightDegrees(90), forward.rotateLeftDegrees(90).rotateLeftDegrees(90)};
-                }
-
-                for (Direction dir : dirs) {
-                    if (rc.canMove(dir)) {
-                        rc.move(dir);
-                        return true;
-                    }
-                }
-
             }
-
+            // Try the offset on the right side
+            Direction rightSide = dir.rotateRightDegrees(degreeOffset * currentCheck);
+            if (rc.canMove(rightSide)) {
+                if (!willCollideWithMe(visibleBullets, myLocation.add(rightSide))) {
+                    rc.move(rightSide);
+                    return true;
+                }
+            }
+            // No move performed, try slightly further
+            currentCheck++;
         }
-        System.out.println("RETURN FALSE HERE");
+
+        // A move never happened, so return false.
         return false;
     }
 
-    private static boolean preferLeft(MapLocation dest) {
-        Direction toDest = myLocation.directionTo(dest);
-        MapLocation leftLoc = myLocation.add(toDest.rotateLeftDegrees(90));
-        MapLocation rightLoc = myLocation.add(toDest.rotateRightDegrees(90));
-        return (dest.distanceTo(leftLoc) < dest.distanceTo(rightLoc));
+    static boolean tryMove(Direction dir) throws GameActionException {
+        return tryMove(dir, 45, 3);
     }
 
+    static Direction randomDirection() {
+        return new Direction((float) Math.random() * 2 * (float) Math.PI);
+    }
+
+    static boolean willCollideWithMe(BulletInfo[] bullets, MapLocation location) {
+
+        for (BulletInfo B : bullets) {
+            // Get relevant bullet information
+            Direction propagationDirection = B.dir;
+            MapLocation bulletLocation = B.location;
+
+            // Calculate bullet relations to this robot
+            Direction directionToRobot = bulletLocation.directionTo(location);
+            float distToRobot = bulletLocation.distanceTo(location);
+            float theta = propagationDirection.radiansBetween(directionToRobot);
+
+            if ((float) Math.abs(distToRobot * Math.sin(theta)) <= myBodyRadius) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
