@@ -1,8 +1,6 @@
 package Axolotl;
 
-import battlecode.common.Clock;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
+import battlecode.common.*;
 
 import static Axolotl.Movement.*;
 
@@ -24,13 +22,36 @@ public class Archon extends General {
         }
     }
 
-    private static void turn() throws GameActionException{
+    private static void turn() throws GameActionException {
+        avoidEnemyRobots();
+        avoidBullets();
+        mainJob();
+    }
 
+    private static void mainJob() throws GameActionException{
         if (rc.readBroadcast(0) < 1) {
             tryToSpawn();
         }
-        Direction forward = myLocation.directionTo(EnemyInitialArchonLocations[0]);
-        tryMove(forward);
+        if(rc.getMoveCount() < 1){
+            tryMove(randomDirection());
+        }
+    }
+
+    private static void avoidEnemyRobots() throws GameActionException {
+        if (visibleEnemies.length > 0) {
+            if (myLocation.distanceTo(visibleEnemies[0].getLocation()) < 7) {
+                Direction oppositeDirection = myLocation.directionTo(visibleEnemies[0].getLocation()).opposite();
+                if (rc.canMove(oppositeDirection)) {
+                    tryMove(oppositeDirection);
+                }
+            }
+        }
+    }
+
+    private static void avoidBullets() throws GameActionException {
+        if (willCollideWithMe(visibleBullets, myLocation)) {
+            tryMove(randomDirection());
+        }
     }
 
     private static void tryToSpawn() throws GameActionException {
