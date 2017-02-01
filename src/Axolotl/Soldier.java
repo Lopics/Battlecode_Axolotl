@@ -1,47 +1,56 @@
 package Axolotl;
 
-import battlecode.common.Clock;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
-import battlecode.common.Team;
+import battlecode.common.*;
 
+import static Axolotl.Broadcasts.*;
 import static Axolotl.Movement.*;
 
 
-public class Soldier {
-    public static void loop(){
-        Team enemy = rc.getTeam().opponent();
-
-        // The code you want your robot to perform every round should be in this loop
+public class Soldier extends General {
+    public static void loop() throws GameActionException {
         while (true) {
-
-            // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
-                MapLocation myLocation = rc.getLocation();
-
-                // See if there are any nearby enemy robots
-                RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
-
-                // If there are some...
-                if (robots.length > 0) {
-                    // And we have enough bullets, and haven't attacked yet this turn...
-                    if (rc.canFireSingleShot()) {
-                        // ...Then fire a bullet in the direction of the enemy.
-                        rc.fireSingleShot(rc.getLocation().directionTo(robots[0].location));
-                    }
-                }
-
-                // Move randomly
-                tryMove(randomDirection());
-
-                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
+                update();
+                updateBullets();
+                updateRobotInfos();
+                turn();
                 Clock.yield();
-
             } catch (Exception e) {
                 System.out.println("Soldier Exception");
                 e.printStackTrace();
             }
-            Clock.yield();
+        }
+
+    }
+
+    private static void turn() throws GameActionException {
+        dead();
+        if (visibleEnemies.length > 0) {
+            for (RobotInfo R : visibleEnemies) {
+                tryMove(myLocation.directionTo(R.getLocation()));
+                if (rc.canFirePentadShot()) {
+                    rc.firePentadShot(myLocation.directionTo(R.getLocation()));
+                }
+                if (rc.canFireSingleShot()) {
+                    rc.fireSingleShot(myLocation.directionTo(R.getLocation()));
+                }
+            }
+        } else {
+            if (rc.readBroadcast(BROADCAST_ARCHON_NEED_HELP) > 0) {
+                tryMove(myLocation.directionTo(mapLocationFromInt(rc.readBroadcast(BROADCAST_ARCHON_NEED_HELP))));
+            } else {
+                if (myLocation.distanceTo(visibleAllies[0].getLocation()) <= 7) {
+                    tryMove(myLocation.directionTo(visibleAllies[0].getLocation()).opposite());
+                }
+            }
+        }
+    }
+
+    private static void dead() throws GameActionException {
+        if (myHealth < 25 && deadmSend == false) {
+            rc.broadcast(BROADCAST_NUMBER_OF_SOLDIER, rc.readBroadcast(BROADCAST_NUMBER_OF_SOLDIER) - 1);
+            deadmSend = true;
         }
     }
 }
+

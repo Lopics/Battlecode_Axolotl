@@ -2,6 +2,10 @@ package Axolotl;
 
 import battlecode.common.*;
 
+import static Axolotl.Broadcasts.*;
+import static Axolotl.Functions.avoidBullets;
+import static Axolotl.Functions.avoidEnemyRobots;
+import static Axolotl.Functions.tryToSpawn;
 import static Axolotl.Movement.*;
 
 public class Archon extends General {
@@ -11,6 +15,7 @@ public class Archon extends General {
                 update();
                 updateBullets();
                 updateRobotInfos();
+                updateVictoryPoints();
                 turn();
                 Clock.yield();
 
@@ -23,51 +28,55 @@ public class Archon extends General {
     }
 
     private static void turn() throws GameActionException {
+        if (rc.readBroadcast(BROADCAST_LEADER_ARCHON) == 0) {
+            rc.broadcast(BROADCAST_LEADER_ARCHON, myID);
+            leaderArchon = true;
+        }
         avoidEnemyRobots();
         avoidBullets();
-        mainJob();
-    }
-
-    private static void mainJob() throws GameActionException{
         if (rc.readBroadcast(0) < 1) {
-            tryToSpawn();
+            tryToSpawn(RobotType.GARDENER, BROADCAST_NUMBER_OF_GARDENER);
         }
-        if(rc.getMoveCount() < 1){
-            tryMove(randomDirection());
+        if (leaderArchon) {
+            leaderJob();
+        }else{
+            normalJob();
         }
-    }
 
-    private static void avoidEnemyRobots() throws GameActionException {
         if (visibleEnemies.length > 0) {
-            if (myLocation.distanceTo(visibleEnemies[0].getLocation()) < 7) {
-                Direction oppositeDirection = myLocation.directionTo(visibleEnemies[0].getLocation()).opposite();
-                if (rc.canMove(oppositeDirection)) {
-                    tryMove(oppositeDirection);
-                }
+            sendMapLocation(BROADCAST_ARCHON_NEED_HELP, visibleEnemies[0].getLocation());
+        } else if (visibleEnemies.length == 0) {
+            rc.broadcast(BROADCAST_ARCHON_NEED_HELP, 0);
+        }
+
+        if (visibleAllies.length > 0) {
+            if (myLocation.distanceTo(visibleAllies[0].getLocation()) < 10) {
+                tryMove(myLocation.directionTo(visibleAllies[0].getLocation()).opposite());
             }
         }
     }
 
-    private static void avoidBullets() throws GameActionException {
-        if (willCollideWithMe(visibleBullets, myLocation)) {
-            tryMove(randomDirection());
+    private static void normalJob() throws GameActionException {
+        if (rc.readBroadcast(0) < 3 && roundNum > 50 && rc.readBroadcast(BROADCAST_NUMBER_OF_LUMBERJACK) > 2) {
+            tryToSpawn(RobotType.GARDENER, BROADCAST_NUMBER_OF_GARDENER);
+            gardnerCount++;
         }
     }
 
-    private static void tryToSpawn() throws GameActionException {
-        Direction dir = randomDirection();
-        int count = 0;
-        while (!rc.canHireGardener(dir)) {
-            dir.rotateRightDegrees(90);
-            count++;
-            if (count > 3) {
-                break;
-            }
+    private static void leaderJob() throws GameActionException {
+
+        if (rc.readBroadcast(0) < 7 && roundNum > 50 && rc.readBroadcast(BROADCAST_NUMBER_OF_LUMBERJACK) > 2) {
+            tryToSpawn(RobotType.GARDENER, BROADCAST_NUMBER_OF_GARDENER);
+            gardnerCount++;
         }
-        if (rc.canHireGardener(dir)) {
-            rc.hireGardener(dir);
-            rc.broadcast(0, rc.readBroadcast(0) + 1);
-            return;
+
+        if (enemyVictoryPoints > myVictoryPoints || rc.getTeamBullets() > 500) {
+            rc.donate(rc.getVictoryPointCost());
+        }
+
+        if (rc.getTeamBullets() > 1000) {
+            rc.donate(500);
         }
     }
+
 }

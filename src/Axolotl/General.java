@@ -2,6 +2,10 @@ package Axolotl;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class General {
     private static final int MAX = 1000;
     private static final int MIN = 0;
@@ -18,15 +22,29 @@ public class General {
     public static MapLocation[] EnemyInitialArchonLocations;
     public static int numberOfInitialArchon;
     public static int roundNum;
-    public static float mySenseRadius;
     public static RobotInfo[] visibleEnemies = null;
     public static TreeInfo[] visibleNeutralTrees = null;
+    public static TreeInfo[]  visisbleAllyTrees = null;
     public static RobotInfo[] visibleAllies = null;
-    public static MapLocation[] broadcastingRobot = null;
     public static BulletInfo[] visibleBullets = null;
+    public static TreeInfo[] visibleEnemyTrees = null;
+    public static boolean foundFirstEnemy = false;
+    public static int enemyVictoryPoints = 0;
+    public static int myVictoryPoints =0;
+    public static boolean isCircleBuilt = false;
+    public static boolean deadmSend = false;
+    public static boolean meLeader = false;
+    public static int myJob = 0;
+    public static boolean initialized = false;
+    public static int myChannel = 0;
+    public static float myHealth;
+    public static ArrayList<MapLocation> myMovementMemory = new ArrayList<MapLocation>();
+    public static boolean leaderArchon = false;
+    public static int gardnerCount= 0;
 
     public static void init(RobotController RC) {
         rc = RC;
+        myID = rc.getID();
         myTeam = rc.getTeam();
         EnemyTeam = myTeam.opponent();
         myID = rc.getID();
@@ -36,9 +54,12 @@ public class General {
         myInitialArchonLocations = rc.getInitialArchonLocations(myTeam);
         EnemyInitialArchonLocations = rc.getInitialArchonLocations(EnemyTeam);
         numberOfInitialArchon = myInitialArchonLocations.length;
+        myVictoryPoints = rc.getTeamVictoryPoints();
+        enemyVictoryPoints = rc.getOpponentVictoryPoints();
     }
 
     public static void update() {
+        myHealth = rc.getHealth();
         myLocation = rc.getLocation();
         roundNum = rc.getRoundNum();
     }
@@ -46,20 +67,18 @@ public class General {
         visibleBullets = rc.senseNearbyBullets();
     }
     public static void updateRobotInfos() {
-        visibleEnemies =  rc.senseNearbyRobots(mySenseRadius, EnemyTeam);
-        visibleAllies = rc.senseNearbyRobots(mySenseRadius, myTeam);
-        broadcastingRobot = rc.senseBroadcastingRobotLocations();
+        visibleEnemies =  rc.senseNearbyRobots(mySightRadius, EnemyTeam);
+        visibleAllies = rc.senseNearbyRobots(mySightRadius, myTeam);
     }
+    public  static void updateVictoryPoints(){
+        myVictoryPoints = rc.getTeamVictoryPoints();
+        enemyVictoryPoints = rc.getOpponentVictoryPoints();
+    }
+
 
     public static void updateTreeInfos(){
-        visibleNeutralTrees = rc.senseNearbyTrees(mySenseRadius,Team.NEUTRAL);
-    }
-
-    public static int encode(int x, int y) {
-        return (x * (MAX - MIN + 1)) + y;
-    }
-
-    public static int[] decode(int z) {
-        return new int[]{(MIN + (z / (MAX - MIN + 1))), (MIN + (z % (MAX - MIN + 1)))};
+        visisbleAllyTrees = rc.senseNearbyTrees(mySightRadius,myTeam);
+        visibleNeutralTrees = rc.senseNearbyTrees(mySightRadius,Team.NEUTRAL);
+        visibleEnemyTrees = rc.senseNearbyTrees(mySightRadius, EnemyTeam);
     }
 }

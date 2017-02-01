@@ -2,7 +2,6 @@ package Axolotl;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
-
 public class Broadcasts extends General {
 
 
@@ -12,8 +11,14 @@ public class Broadcasts extends General {
     public static final int BROADCAST_NUMBER_OF_SOLDIER = 3;
     public static final int BROADCAST_NUMBER_OF_TANK = 4;
     public static final int BROADCAST_ATTACK_COMMAND = 5;
+    public static final int BROADCAST_NUMBER_OF_GARDENER_L = 6;
+    public static final int BROADCAST_LEADER_ARCHON = 7;
+    public static final int[] BROADCAST_LUMBERJACK_ATTACK = {10,11};
+
+    public static final int BROADCAST_ARCHON_NEED_HELP = 15;
     public static final int BROADCAST_NEUTRAL_TREES = 20;
-    public static final int BROADCAST__ENEMY_ARCHONS_LOCATION = 30;
+    public static final int BROADCAST_ENEMY_ARCHONS_LOCATION = 30;
+    public static final int BROADCAST_ENEMY_ARCHONS_DEAD = 29;
 
     public static int intFromMapLocation(MapLocation loc) {
         if (loc == null) return 0xfffff;
@@ -27,7 +32,7 @@ public class Broadcasts extends General {
         return new MapLocation(x, y);
     }
 
-    private static void sendMapLocation(int channel, MapLocation loc) throws GameActionException {
+    public static void sendMapLocation(int channel, MapLocation loc) throws GameActionException {
         rc.broadcast(channel, intFromMapLocation(loc));
     }
 
